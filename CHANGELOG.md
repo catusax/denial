@@ -17,9 +17,8 @@ boundaries may change before 1.0.
   Settings application is gone. On a phone the package takes the place of
   `denial-app-settings`.
 
-- System tray icons no longer show item titles beside them; hovering an icon
-  shows its tooltip, with the item title as a fallback when no tooltip content
-  is supplied.
+- System tray icons show StatusNotifier tooltip titles and descriptions on hover,
+  with the item title as fallback when no tooltip content is supplied.
 
 ### Added
 
