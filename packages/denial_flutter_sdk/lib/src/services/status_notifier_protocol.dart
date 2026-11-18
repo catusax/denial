@@ -157,6 +157,8 @@ List<Object?> _encodeTrayItem(SystemTrayItem item, {bool reusePixmap = false}) {
     item.menuAvailable,
     item.primaryOpensMenu,
     item.menuPath,
+    item.tooltipTitle,
+    item.tooltipDescription,
   ];
 }
 
@@ -179,6 +181,8 @@ SystemTrayItem _decodeTrayItem(Object? response, {SystemTrayItem? previous}) {
     bool menuAvailable,
     bool primaryOpensMenu,
     String menuPath,
+    String tooltipTitle,
+    String tooltipDescription,
   ]) {
     if (sourceIndex < 0 ||
         sourceIndex >= SystemTrayItemSource.values.length ||
@@ -203,6 +207,8 @@ SystemTrayItem _decodeTrayItem(Object? response, {SystemTrayItem? previous}) {
       menuAvailable: menuAvailable,
       primaryOpensMenu: primaryOpensMenu,
       menuPath: menuPath,
+      tooltipTitle: tooltipTitle,
+      tooltipDescription: tooltipDescription,
     );
   }
   throw const FormatException('Invalid StatusNotifier item');

@@ -85,6 +85,14 @@ String _string(DBusValue? value, {String fallback = ''}) {
   }
 }
 
+({String title, String description}) _tooltipText(DBusValue? value) {
+  if (value == null || value.signature != DBusSignature('(sa(iiay)ss)')) {
+    return (title: '', description: '');
+  }
+  final fields = value.asStruct();
+  return (title: fields[2].asString(), description: fields[3].asString());
+}
+
 String? _objectPath(DBusValue? value) {
   try {
     return value?.asObjectPath().value;

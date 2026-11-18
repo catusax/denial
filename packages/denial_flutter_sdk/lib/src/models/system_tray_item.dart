@@ -79,11 +79,20 @@ class SystemTrayItem {
     required this.menuAvailable,
     required this.primaryOpensMenu,
     this.menuPath = '',
+    this.tooltipTitle = '',
+    this.tooltipDescription = '',
   });
 
   final String id;
   final SystemTrayItemSource source;
+
   final String title;
+
+  /// The title from SNI ToolTip, independent of the item's [title].
+  final String tooltipTitle;
+
+  /// The description from SNI ToolTip, with exporter markup preserved.
+  final String tooltipDescription;
   final SystemTrayStatus status;
   final String iconName;
   final String iconThemePath;
@@ -98,6 +107,8 @@ class SystemTrayItem {
         other.id == id &&
         other.source == source &&
         other.title == title &&
+        other.tooltipTitle == tooltipTitle &&
+        other.tooltipDescription == tooltipDescription &&
         other.status == status &&
         other.iconName == iconName &&
         other.iconThemePath == iconThemePath &&
@@ -112,6 +123,8 @@ class SystemTrayItem {
     id,
     source,
     title,
+    tooltipTitle,
+    tooltipDescription,
     status,
     iconName,
     iconThemePath,

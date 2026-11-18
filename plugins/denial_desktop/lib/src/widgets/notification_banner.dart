@@ -21,6 +21,7 @@ import 'package:denial_flutter_sdk/tokens.dart';
 import 'mobile_ui_metrics.dart';
 import 'notification_media.dart';
 import 'notification_open.dart';
+import 'plain_markup_text.dart';
 
 export 'notification_open.dart' show openLockNotification, openNotification;
 

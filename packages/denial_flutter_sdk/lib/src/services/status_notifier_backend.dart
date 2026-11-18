@@ -425,8 +425,16 @@ class _StatusNotifierDbusBackend {
       _itemProperties
           .putIfAbsent(registration.id, () => <String, DBusValue>{})
           .addEntries(resolved);
+      if (propertyNames.contains('ToolTip') &&
+          !resolved.any((entry) => entry.key == 'ToolTip')) {
+        _itemProperties[registration.id]?.remove('ToolTip');
+      }
       _updateItem(registration);
       return;
+    }
+    if (propertyNames.contains('ToolTip')) {
+      _itemProperties[registration.id]?.remove('ToolTip');
+      _updateItem(registration);
     }
   }
 
@@ -479,10 +487,13 @@ class _StatusNotifierDbusBackend {
         ? itemId
         : registration.busName;
     final menuPath = _objectPath(properties['Menu']);
+    final tooltip = _tooltipText(properties['ToolTip']);
     _items[registration.id] = SystemTrayItem(
       id: registration.id,
       source: SystemTrayItemSource.statusNotifier,
       title: title,
+      tooltipTitle: tooltip.title,
+      tooltipDescription: tooltip.description,
       status: status,
       iconName: iconName,
       iconThemePath: _boundedText(_string(properties['IconThemePath']), 4096),

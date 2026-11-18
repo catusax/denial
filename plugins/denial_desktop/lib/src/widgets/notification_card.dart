@@ -61,7 +61,7 @@ class NotificationCard extends StatelessWidget {
     final body = !fullPreview
         ? ''
         : messages.isEmpty
-        ? plainNotificationBody(notification.body)
+        ? plainMarkupText(notification.body)
         : notificationMessageLines(messages, l10n, expanded ? null : 2);
     final stack = group?.stacked ?? false ? group : null;
     var hasDefaultAction = false;
@@ -480,7 +480,7 @@ class _NotificationGroupLine extends StatelessWidget {
     final l10n = context.l10n;
     final messages = notification.messages;
     final detail = messages.isEmpty
-        ? plainNotificationBody(notification.body)
+        ? plainMarkupText(notification.body)
         : notificationMessageLines(messages, l10n, 1);
     final visual = MobileUiMetrics.of(context).visual;
     final fontSize = mobile ? MobileNotificationMetrics.bodyFontSize : 12.0;

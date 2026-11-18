@@ -437,6 +437,10 @@ Subscribe to `trayItemIds` and pass an ordered `itemIds` subset to
 Omitting the subset renders all items; removed IDs are ignored. Keep activation
 and context menus in the shared renderer rather than duplicating native handling.
 
+The reference desktop shows each system tray item as an icon. Hovering displays
+plain-text tooltips built from the StatusNotifier `ToolTip` title and description.
+If neither is supplied, the item title is used as the tooltip.
+
 `toggleDesktop()` and `desktopVisible` expose the reference desktop's temporary
 reveal mode. It suppresses application painting and input across outputs while
 retaining window geometry, stacking, and minimized state. Selecting/launching an

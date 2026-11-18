@@ -17,6 +17,10 @@ boundaries may change before 1.0.
   Settings application is gone. On a phone the package takes the place of
   `denial-app-settings`.
 
+- System tray icons no longer show item titles beside them; hovering an icon
+  shows its tooltip, with the item title as a fallback when no tooltip content
+  is supplied.
+
 ### Added
 
 - An app size apart from the shell's (`apps.scale`, 1 to 3). Apps opened

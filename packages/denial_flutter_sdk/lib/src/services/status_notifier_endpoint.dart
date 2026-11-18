@@ -162,6 +162,7 @@ DBusIntrospectSignal _watcherSignal(String name) => DBusIntrospectSignal(
 const Set<String> _knownItemProperties = <String>{
   'Id',
   'Title',
+  'ToolTip',
   'Status',
   'IconName',
   'IconPixmap',
@@ -174,6 +175,7 @@ const Set<String> _knownItemProperties = <String>{
 
 const Map<String, Set<String>> _itemSignalProperties = <String, Set<String>>{
   'NewTitle': <String>{'Title'},
+  'NewToolTip': <String>{'ToolTip'},
   'NewStatus': <String>{'Status'},
   'NewIcon': <String>{'IconName', 'IconPixmap'},
   'NewAttentionIcon': <String>{'AttentionIconName', 'AttentionIconPixmap'},

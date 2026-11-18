@@ -18,6 +18,8 @@ import 'package:denial_flutter_sdk/shell_theme.dart';
 import 'package:denial_flutter_sdk/tokens.dart';
 import 'package:denial_flutter_sdk/rendering.dart';
 
+import '../widgets/plain_markup_text.dart';
+
 @immutable
 class SystemTrayIconRequest {
   const SystemTrayIconRequest({
@@ -760,8 +762,48 @@ class _SystemTrayButtonState extends ConsumerState<_SystemTrayButton> {
         : item.iconName.isNotEmpty
         ? item.iconName
         : 'System tray';
+    final tooltipTitle = item.tooltipTitle;
+    final tooltipDescription = plainMarkupText(item.tooltipDescription);
+    final hasTooltipContent =
+        tooltipTitle.isNotEmpty || tooltipDescription.isNotEmpty;
+    final tooltipMessage = <String>[
+      if (tooltipTitle.isNotEmpty) tooltipTitle,
+      if (tooltipDescription.isNotEmpty && tooltipDescription != tooltipTitle)
+        tooltipDescription,
+      if (!hasTooltipContent && item.title.isNotEmpty) item.title,
+    ].join('\n');
+    final icon = SizedBox.square(
+      dimension: 22,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          Center(
+            child: SizedBox.square(
+              key: systemTrayItemIconKey(item.id),
+              dimension: 18,
+              child: Opacity(
+                opacity: passive ? 0.52 : 1,
+                child: RepaintBoundary(child: _SystemTrayIcon(item: item)),
+              ),
+            ),
+          ),
+          if (attention)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: widget.accent,
+                  shape: BoxShape.circle,
+                ),
+                child: const SizedBox.square(dimension: 4),
+              ),
+            ),
+        ],
+      ),
+    );
     void activate() => unawaited(_activatePrimary(_centerPosition()));
-    return MenuAnchor(
+    final button = MenuAnchor(
       controller: _menuController,
       consumeOutsideTap: false,
       useRootOverlay: false,
@@ -795,44 +837,20 @@ class _SystemTrayButtonState extends ConsumerState<_SystemTrayButton> {
                 ),
                 onSecondaryTapDown: (details) =>
                     unawaited(_openContextMenu(details.globalPosition)),
-                child: SizedBox.square(
-                  dimension: 22,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: <Widget>[
-                      Center(
-                        child: SizedBox.square(
-                          key: systemTrayItemIconKey(item.id),
-                          dimension: 18,
-                          child: Opacity(
-                            opacity: passive ? 0.52 : 1,
-                            child: RepaintBoundary(
-                              child: _SystemTrayIcon(item: item),
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (attention)
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: widget.accent,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const SizedBox.square(dimension: 4),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+                child: icon,
               ),
             ),
           ),
         ),
       ),
     );
+    return tooltipMessage.isEmpty
+        ? button
+        : Tooltip(
+            message: tooltipMessage,
+            waitDuration: const Duration(milliseconds: 500),
+            child: button,
+          );
   }
 
   @override
