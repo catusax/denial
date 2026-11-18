@@ -22,6 +22,10 @@ boundaries may change before 1.0.
 
 ### Added
 
+- Click the top-bar date to open a compact, localized calendar that expands
+  from the bar edge and collapses when dismissed. Small dots under date numbers
+  distinguish official mainland China days off and make-up workdays for
+  2025–2027, with details in the agenda. Click the time to open the dashboard.
 - An app size apart from the shell's (`apps.scale`, 1 to 3). Apps opened
   after a change draw that many times larger than the screen's scale, at full
   sharpness; X11 apps follow through their DPI. The shell and Droidloom keep
