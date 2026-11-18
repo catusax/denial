@@ -461,7 +461,9 @@ class _SystemBarClockOwnerState extends ConsumerState<_SystemBarClockOwner>
                   child: Text(
                     time,
                     key: ValueKey<String>(time),
-                    style: ShellText.systemBarValue,
+                    style: ShellText.systemBarValue.copyWith(
+                      color: context.shellColors.textPrimary,
+                    ),
                   ),
                 ),
               ),

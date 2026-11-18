@@ -3,16 +3,24 @@ import 'dart:math' as math;
 
 import 'package:denial_flutter_sdk/effects.dart';
 import 'package:denial_flutter_sdk/input.dart';
-import 'package:denial_flutter_sdk/panels.dart';
+import 'package:denial_flutter_sdk/platform.dart';
 import 'package:denial_flutter_sdk/services.dart';
+import 'package:denial_flutter_sdk/state.dart';
+import 'package:denial_flutter_sdk/surfaces.dart';
 import 'package:denial_flutter_sdk/theme.dart';
 import 'package:denial_sdk/system.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'calendar_holidays.dart';
 
 part 'desktop_system_bar_components.dart';
 part 'desktop_system_bar_media.dart';
 part 'desktop_workspace_indicator.dart';
+part 'desktop_system_bar_calendar.dart';
+part 'desktop_system_bar_calendar_panel.dart';
+part 'desktop_system_bar_calendar_picker.dart';
 
 /// The desktop system bar. Its strip is reserved from the window work area,
 /// so windows maximize beside it while true fullscreen covers it.
@@ -130,12 +138,11 @@ class _DesktopSystemBarContent extends ConsumerWidget {
           key: const ValueKey('system-bar-clock'),
           index: 0,
           horizontal: horizontal,
-          child: _SystemBarButton(
-            key: systemBarClockButtonKey,
+          child: _SystemBarClockOwner(
             accent: accent,
-            label: context.pluginStrings.openDashboard,
-            onPressed: onOpenDashboard,
-            child: _ClockStatusModule(accent: accent),
+            monitorId: monitorId,
+            side: side,
+            onOpenDashboard: onOpenDashboard,
           ),
         ),
       ],

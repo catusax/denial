@@ -121,20 +121,6 @@ class _CpuStatusCard extends ConsumerWidget {
   }
 }
 
-/// Rebuilds the clock card only at the minute boundary.
-class _ClockStatusModule extends ConsumerWidget {
-  const _ClockStatusModule({required this.accent});
-
-  final WallpaperAccent accent;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final now =
-        ref.watch(context.telemetryServices.clock).value ?? DateTime.now();
-    return _ClockModule(accent: accent, now: now);
-  }
-}
-
 class _MediaStatusModule extends ConsumerStatefulWidget {
   const _MediaStatusModule({
     required this.accent,

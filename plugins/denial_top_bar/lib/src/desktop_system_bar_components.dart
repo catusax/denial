@@ -1,57 +1,5 @@
 part of 'desktop_system_bar.dart';
 
-/// Date caption plus the ticking clock. The caption re-tints with the
-/// wallpaper accent; minute changes crossfade with a small upward slide.
-class _ClockModule extends StatelessWidget {
-  const _ClockModule({required this.accent, required this.now});
-
-  final WallpaperAccent accent;
-  final DateTime now;
-
-  @override
-  Widget build(BuildContext context) {
-    final time = context.pluginStrings.time(now);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AnimatedDefaultTextStyle(
-          duration: Motion.wallpaperReveal,
-          curve: Motion.standard,
-          style: ShellText.systemBarCaption.copyWith(
-            color: accent.captionColor(context.shellTheme),
-          ),
-          child: Text(context.pluginStrings.shortDate(now)),
-        ),
-        const SizedBox(width: 8),
-        AnimatedSwitcher(
-          duration: Motion.cardSettle,
-          switchInCurve: Motion.standard,
-          switchOutCurve: Motion.standard,
-          transitionBuilder: (child, animation) => FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0.0, 0.25),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            ),
-          ),
-          child: Text(
-            time,
-            key: ValueKey<String>(time),
-            // The dashboard button's Material resets the inherited text
-            // style, so the clock names the bar's value color itself.
-            style: ShellText.systemBarValue.copyWith(
-              color: context.shellColors.textPrimary,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 /// A compact battery gauge whose cell fills with the wallpaper accent. The
 /// charging bolt is drawn inside the cell, leaving the module calm and
 /// readable without spending horizontal space on a second status icon.
