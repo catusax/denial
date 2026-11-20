@@ -37,6 +37,7 @@ class DesktopOverviewTransitionStatus
 class DesktopOverviewPreviewInteraction extends StatefulWidget {
   const DesktopOverviewPreviewInteraction({
     super.key,
+    required this.clientOwnsInput,
     required this.overviewActive,
     required this.overview,
     required this.desktopWidget,
@@ -53,6 +54,7 @@ class DesktopOverviewPreviewInteraction extends StatefulWidget {
     required this.child,
   });
 
+  final bool clientOwnsInput;
   final bool overviewActive;
   final bool overview;
   final bool desktopWidget;
@@ -149,7 +151,7 @@ class _DesktopOverviewPreviewInteractionState
     final interactive =
         (widget.overviewActive && widget.overview) ||
         (!widget.overviewActive && widget.desktopWidget);
-    return Semantics(
+    final preview = Semantics(
       button: interactive,
       selected: widget.overview ? widget.selected : null,
       label: interactive ? widget.label : null,
@@ -204,6 +206,12 @@ class _DesktopOverviewPreviewInteractionState
           ),
         ),
       ),
+    );
+    // Native hit testing already checks the live surface tree. When it sends
+    // a miss to Flutter, this preview must let the shell below receive it.
+    return IgnorePointer(
+      ignoring: widget.clientOwnsInput && !interactive,
+      child: preview,
     );
   }
 }

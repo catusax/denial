@@ -1421,6 +1421,16 @@ impl CompositorHandler for RuntimeState {
             let root_committed = root == *surface;
             let window = frontend.window_for_root_surface(&root);
             if let Some(window) = window {
+                #[cfg(feature = "xwayland")]
+                let input_shape_changed = root_committed
+                    && ManagedWindow::new(&window)
+                        .is_some_and(|managed| managed.refresh_x11_input_shape(&root));
+                #[cfg(all(feature = "xwayland", feature = "flutter"))]
+                {
+                    committed_window_metadata_changed |= input_shape_changed;
+                }
+                #[cfg(all(feature = "xwayland", not(feature = "flutter")))]
+                let _ = input_shape_changed;
                 #[cfg(feature = "flutter")]
                 let previous_content_geometry = window.geometry();
                 #[cfg(feature = "flutter")]

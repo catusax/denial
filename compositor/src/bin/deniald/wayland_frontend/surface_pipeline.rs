@@ -1499,7 +1499,6 @@ impl WaylandFrontend {
                 .and_then(|output| i64::try_from(output.0).ok())
                 .unwrap_or(-1);
             let presentation = self.managed_window_presentation(window);
-            let suppress_animations = protocol_facts.x11 && !presentation.server_side_decorated;
             let server_side_decorated = presentation.server_side_decorated;
             let window_opacity = protocol_facts.opacity;
             if window_opacity < 1.0 {
@@ -1583,7 +1582,7 @@ impl WaylandFrontend {
                 content_y: f64::from(content.loc.y),
                 content_width: f64::from(content.size.w),
                 content_height: f64::from(content.size.h),
-                suppress_animations,
+                suppress_animations: protocol_facts.suppress_animations,
                 server_side_decorated,
                 opacity: if opacity_class == WindowOpacityClass::FullyOpaque {
                     window_opacity

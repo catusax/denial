@@ -174,6 +174,8 @@ boundaries may change before 1.0.
 
 ### Fixed
 
+- Xwayland overlays with custom input shapes let clicks reach the desktop bar
+  through their holes and draw without Denial's window frame or shadow (#286).
 - Qt and other Xlib apps under Xwayland are scaled: Denial also sets
   `Xft.dpi` in the X resources, which they read instead of XSETTINGS.
 - A quick flick in mobile recents reaches the next card however short it

@@ -6,12 +6,21 @@
 //! backend-specific state. Everything above it consumes [`ManagedWindowFacts`]
 //! and invokes backend-neutral operations.
 
+#[cfg(feature = "xwayland")]
+use std::cell::Cell;
+
+#[cfg(feature = "xwayland")]
+use smithay::backend::renderer::utils::with_renderer_surface_state;
 use smithay::desktop::Window;
 use smithay::reexports::wayland_protocols::xdg::shell::server::xdg_toplevel;
 use smithay::reexports::wayland_server::Resource;
 use smithay::reexports::wayland_server::protocol::wl_output;
+#[cfg(feature = "xwayland")]
+use smithay::reexports::wayland_server::protocol::wl_surface::WlSurface;
 use smithay::utils::{Logical, Rectangle, Serial, Size};
 use smithay::wayland::compositor::with_states;
+#[cfg(feature = "xwayland")]
+use smithay::wayland::compositor::{RectangleKind, RegionAttributes, SurfaceAttributes};
 use smithay::wayland::shell::xdg::{
     SurfaceCachedState, ToplevelCachedState, ToplevelState, ToplevelSurface, XdgToplevelSurfaceData,
 };
@@ -132,6 +141,8 @@ pub(super) struct ClientWindowState {
 pub(super) struct ManagedWindowFacts {
     pub(super) client_state: ClientWindowState,
     pub(super) server_side_decorated: bool,
+    #[cfg(feature = "flutter")]
+    pub(super) suppress_animations: bool,
     pub(super) auxiliary: bool,
     pub(super) override_redirect: bool,
     pub(super) minimum_size: Size<i32, Logical>,
@@ -154,6 +165,16 @@ enum ManagedWindowProtocol<'a> {
     Xdg(&'a ToplevelSurface),
     #[cfg(feature = "xwayland")]
     X11(&'a X11Surface),
+}
+
+#[cfg(feature = "xwayland")]
+struct X11InputShape(Cell<bool>);
+
+#[cfg(feature = "xwayland")]
+fn x11_input_is_shaped(region: &RegionAttributes, bounds: Rectangle<i32, Logical>) -> bool {
+    // Xwayland sends the X server's normalized region as additions. Its
+    // default frame shape covers the surface with a single rectangle.
+    !matches!(region.rects.as_slice(), [(RectangleKind::Add, rect)] if rect.contains_rect(bounds))
 }
 
 fn prepare_geometry_reassertion(
@@ -193,6 +214,34 @@ impl<'a> ManagedWindow<'a> {
         Some(Self { protocol })
     }
 
+    #[cfg(feature = "xwayland")]
+    pub(super) fn refresh_x11_input_shape(&self, root: &WlSurface) -> bool {
+        let ManagedWindowProtocol::X11(surface) = self.protocol else {
+            return false;
+        };
+        let shaped = with_renderer_surface_state(root, |state| state.view())
+            .flatten()
+            .is_some_and(|view| {
+                with_states(root, |states| {
+                    states
+                        .cached_state
+                        .get::<SurfaceAttributes>()
+                        .current()
+                        .input_region
+                        .as_ref()
+                        .is_some_and(|region| {
+                            x11_input_is_shaped(region, Rectangle::from_size(view.dst))
+                        })
+                })
+            });
+        let data = surface.user_data();
+        if let Some(previous) = data.get::<X11InputShape>() {
+            previous.0.replace(shaped) != shaped
+        } else {
+            shaped && data.insert_if_missing(|| X11InputShape(Cell::new(true)))
+        }
+    }
+
     pub(super) fn facts(&self) -> ManagedWindowFacts {
         match self.protocol {
             ManagedWindowProtocol::Xdg(toplevel) => {
@@ -208,6 +257,8 @@ impl<'a> ManagedWindow<'a> {
                         resizing: toplevel_has_state(toplevel, xdg_toplevel::State::Resizing),
                     },
                     server_side_decorated: true,
+                    #[cfg(feature = "flutter")]
+                    suppress_animations: false,
                     auxiliary: false,
                     override_redirect: false,
                     minimum_size,
@@ -233,16 +284,21 @@ impl<'a> ManagedWindow<'a> {
                             | WmWindowType::Tooltip
                     )
                 );
+                let unframed_popup = surface.is_override_redirect() || protocol_popup;
+                let shaped_input = surface
+                    .user_data()
+                    .get::<X11InputShape>()
+                    .is_some_and(|shape| shape.0.get());
                 ManagedWindowFacts {
                     client_state: ClientWindowState {
                         fullscreen: surface.is_fullscreen(),
                         maximized: surface.is_maximized(),
                         resizing: false,
                     },
-                    // Client motif hints do not choose Denial's frame policy.
-                    // Only protocol-level popups and override-redirect surfaces
-                    // are excluded from the managed toplevel frame.
-                    server_side_decorated: !surface.is_override_redirect() && !protocol_popup,
+                    // Keep shaped overlays free of a rectangular frame and shadow.
+                    server_side_decorated: !unframed_popup && !shaped_input,
+                    #[cfg(feature = "flutter")]
+                    suppress_animations: unframed_popup,
                     auxiliary,
                     override_redirect: surface.is_override_redirect(),
                     minimum_size: surface.min_size().unwrap_or_else(|| Size::from((0, 0))),
@@ -770,6 +826,23 @@ pub(super) fn toplevel_has_state(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(feature = "xwayland")]
+    #[test]
+    fn x11_decoration_distinguishes_full_input_from_click_through_regions() {
+        let bounds = Rectangle::from_size((80, 60).into());
+        let mut region = RegionAttributes::default();
+        assert!(x11_input_is_shaped(&region, bounds));
+
+        region.rects.push((
+            RectangleKind::Add,
+            Rectangle::new((12, 8).into(), (56, 44).into()),
+        ));
+        assert!(x11_input_is_shaped(&region, bounds));
+
+        region.rects[0].1 = bounds;
+        assert!(!x11_input_is_shaped(&region, bounds));
+    }
 
     fn sized(width: i32) -> ToplevelState {
         ToplevelState {
